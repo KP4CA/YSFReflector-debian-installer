@@ -1,8 +1,8 @@
 #!/bin/bash
-#A tool to install YSFReflector.
+#A tool to install YSFReflector (Updated for Debian 12)
 #This is essentially a scripted version of:
 #https://register.ysfreflector.de/installation
-#Step 1: Install Debian 9 and make sure it is up to date.
+#Step 1: Install Debian 12 and make sure it is up to date.
 #Step 2: Run this script
 #Step 3: Use systemd to control the service
 # systemctl status ysfreflector
@@ -17,13 +17,13 @@ fi
 if [ ! -e "/etc/debian_version" ]
 then
   echo ""
-  echo "This script is only tested in Debian 8,9 and x64 cpu Arch. for now."
+  echo "This script is only tested in Debian 12 and x64 cpu Arch."
   exit 0
 fi
 DIRDIR=$(pwd)
 YSFREPO=https://github.com/KP4CA/YSFClients.git
 YSFDASHREPO=https://github.com/dg9vh/YSFReflector-Dashboard.git
-DEP="wget git build-essential apache2 php libapache2-mod-php php7.0-mbstring"
+DEP="wget git build-essential apache2 php libapache2-mod-php php-mbstring php-common"
 YSFINSTDIR=/root/reflector-install-files/ysfreflector
 YSFAPPDIR=/ysfreflector
 YSFDASDIR=/root/reflector-install-files/ysfdash
@@ -52,6 +52,7 @@ read -p "What is the FQDN of the YSF Reflector dashboard? Example: ysf.domain.co
 echo ""
 echo "------------------------------------------------------------------------------"
 echo "Installing required software... "
+apt-get update
 apt-get -y install $DEP
 echo ""
 echo "Creating YSF directories... "
@@ -96,7 +97,7 @@ groupadd mmdvm
 useradd mmdvm -g mmdvm -s /sbin/nologin
 mkdir -p /var/log/YSFReflector
 chown mmdvm: /var/log/YSFReflector
-echo "Copying ysfrelfector to systemd...... "
+echo "Copying ysfreflector to systemd...... "
 cp $DIRDIR/templates/ysfreflector.service /etc/systemd/system
 systemctl daemon-reload
 systemctl enable ysfreflector
@@ -115,7 +116,7 @@ sed -i "s/apache.tbd/$YSFDOMAIN/g" /etc/apache2/sites-available/$YSFDOMAIN.conf
 sed -i "s/ysf-xlxd/ysf/g" /etc/apache2/sites-available/$YSFDOMAIN.conf
 chown -R www-data: $YSFWEBDIR
 a2ensite $YSFDOMAIN
-a2enmod php7.0
+a2enmod rewrite
 systemctl start ysfreflector
 systemctl restart apache2
 echo ""
